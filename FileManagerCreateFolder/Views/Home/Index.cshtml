@@ -1,0 +1,83 @@
+﻿
+<link href="@Url.Content("https://kendo.cdn.telerik.com/2020.1.219/styles/kendo.default-v2.min.css")" rel="stylesheet" type="text/css" />
+
+<script src="@Url.Content("https://code.jquery.com/jquery-1.11.1.min.js")"></script>
+
+<script src="@Url.Content("https://kendo.cdn.telerik.com/2020.1.114/js/kendo.all.min.js")"></script>
+
+<!-- Added aspnet mvc min js -->
+<script src="@Url.Content("https://kendo.cdn.telerik.com/2020.1.114/js/kendo.aspnetmvc.min.js")"></script>
+
+
+
+<button onclick="OpenDocumentManager()">Open</button>
+
+<div id="document-dialog"></div>
+
+
+<script type="text/javascript">
+    $(function () {
+        if (typeof $('#document-dialog').kendoDialog === 'function') {
+            $("#document-dialog").kendoDialog({
+                width: "1200px",
+                height: "700px",
+                draggable: true,
+                visible: false,
+                closable: true,
+                modal: true,
+                content: "<div id='document-manager'></div>",
+                close: function () {
+                    this.element.html("<div id='document-manager'></div>");
+                }
+            });
+        }
+
+        $.extend(true, kendo.data, {
+            schemas: {
+                "filemanager": {
+                    data: function (data) {
+                        return data.Items || data || [];
+                    },
+                    model: {
+                        id: "path",
+                        hasChildren: "hasDirectories",
+                        fields: {
+                            folderId: { field: "FolderId", editable: false, type: "Number" },
+                            name: { field: "Name", editable: true, type: "String", defaultValue: "New Folder" },
+                            size: { field: "Size", editable: false, type: "Number" },
+                            path: { field: "Path", editable: false, type: "String" },
+                            extension: { field: "Extension", editable: false, type: "String" },
+                            isDirectory: { field: "IsDirectory", editable: false, defaultValue: true, type: "Boolean" },
+                            hasDirectories: { field: "HasDirectories", editable: false, defaultValue: false, type: "Boolean" },
+                            created: { field: "Created", type: "Date", editable: false },
+                            createdUtc: { field: "CreatedUtc", type: "Date", editable: false },
+                            modified: { field: "Modified", type: "Date", editable: false },
+                            modifiedUtc: { field: "ModifiedUtc", type: "Date", editable: false }
+                        }
+                    }
+                }
+            }
+        });
+    });
+
+    var OpenDocumentManager = function () {
+        var documentDialog = $('#document-dialog').data('kendoDialog');
+        $("#document-manager").kendoFileManager({
+            dataSource: {
+                transport: {
+                    read: {
+                        type: "post",
+                        url: "http://localhost:42471/FileManager/Read",
+                    },
+                    create: {
+                        type: "post",
+                        url: "http://localhost:42471/FileManager/Create"
+                    },
+                },
+            },
+        });
+
+        documentDialog.open().center();
+    };
+</script>
+
